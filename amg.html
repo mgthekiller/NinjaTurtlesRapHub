@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Ninja Turtles</title>
+  <style>
+    body {
+      background: #0a0f0a;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #39ff14;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h3 {
+      color: #39ff14;
+      margin-top: 50px;
+      text-align: center;
+    }
+    .artistGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      justify-content: center;
+    }
+    .card {
+      background: #111;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      text-align: center;
+      transition: 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      border: 3px solid #39ff14;
+    }
+    .card h3 {
+      margin: 10px 0;
+      color: #39ff14;
+    }
+    .card p {
+      font-size: 14px;
+      margin: 6px 0;
+    }
+    .card a {
+      color: #39ff14;
+      text-decoration: none;
+    }
+    .card a:hover {
+      text-decoration: underline;
+    }
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btns button {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .accept {
+      background: #39ff14;
+      color: #000;
+    }
+    .accept:hover {
+      background: #2ecc71;
+    }
+    .amg {
+      background: #00bcd4;
+      color: #000;
+    }
+    .amg:hover {
+      background: #0097a7;
+    }
+    .reject, .delete {
+      background: #e74c3c;
+      color: #fff;
+    }
+    .reject:hover, .delete:hover {
+      background: #c0392b;
+    }
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: 0.4s;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel</h2>
+
+  <h3>Pending Artists</h3>
+  <div id="pendingList" class="artistGrid"></div>
+
+  <h3>Approved Artists</h3>
+  <div id="approvedList" class="artistGrid"></div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyChYh6bHiB7dAAcDYbrHzW61gyQR0A5UuM",
+      authDomain: "ninjaturtels.firebaseapp.com",
+      projectId: "ninjaturtels",
+      storageBucket: "ninjaturtels.firebasestorage.app",
+      messagingSenderId: "1063186224531",
+      appId: "1:1063186224531:web:76b1369b477808e4654466",
+      measurementId: "G-HEB32CJR1N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const pendingList = document.getElementById("pendingList");
+    const approvedList = document.getElementById("approvedList");
+    const toast = document.getElementById("toast");
+
+    function showToast(message, color="#39ff14") {
+      toast.innerText = message;
+      toast.style.background = color;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    async function loadArtists() {
+      pendingList.innerHTML = "<p>Loading...</p>";
+      approvedList.innerHTML = "<p>Loading...</p>";
+
+      // Pending
+      const qPending = query(collection(db, "artist"), where("approved", "==", false));
+      const pendingSnap = await getDocs(qPending);
+      pendingList.innerHTML = "";
+      pendingSnap.forEach((docSnap) => {
+        const data = docSnap.data();
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+          <img src="${data.imageUrl}" alt="Artist">
+          <h3>${data.artistName}</h3>
+          <p>Email: ${data.email}</p>
+          <p>Instagram: <a href="${data.instagram}" target="_blank">Profile</a></p>
+          <p>YouTube: <a href="${data.youtube}" target="_blank">Channel</a></p>
+          ${data.spotify ? `<p>Spotify: <a href="${data.spotify}" target="_blank">Link</a></p>` : ""}
+          <div class="btns">
+            <button class="accept">Accept Artist</button>
+            <button class="amg">Accept AMG</button>
+            <button class="reject">Reject</button>
+          </div>
+        `;
+        // Accept Artist
+        card.querySelector(".accept").addEventListener("click", async () => {
+          await updateDoc(doc(db, "artist", docSnap.id), { approved: true, amg: false });
+          card.remove();
+          showToast(`${data.artistName} approved as Artist ✅`, "#2ecc71");
+          loadArtists();
+        });
+        // Accept AMG
+        card.querySelector(".amg").addEventListener("click", async () => {
+          await updateDoc(doc(db, "artist", docSnap.id), { approved: true, amg: true });
+          card.remove();
+          showToast(`${data.artistName} approved as AMG 🎵`, "#00bcd4");
+          loadArtists();
+        });
+        // Reject
+        card.querySelector(".reject").addEventListener("click", async () => {
+          await deleteDoc(doc(db, "artist", docSnap.id));
+          card.remove();
+          showToast(`${data.artistName} rejected ❌`, "#e74c3c");
+        });
+        pendingList.appendChild(card);
+      });
+      if (pendingList.innerHTML === "") pendingList.innerHTML = "<p>No pending artists 🎉</p>";
+
+      // Approved
+      const qApproved = query(collection(db, "artist"), where("approved", "==", true));
+      const approvedSnap = await getDocs(qApproved);
+      approvedList.innerHTML = "";
+      approvedSnap.forEach((docSnap) => {
+        const data = docSnap.data();
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+          <img src="${data.imageUrl}" alt="Artist">
+          <h3>${data.artistName} ${data.amg ? "🎵 (AMG)" : ""}</h3>
+          <p>Instagram: <a href="${data.instagram}" target="_blank">Profile</a></p>
+          <p>YouTube: <a href="${data.youtube}" target="_blank">Channel</a></p>
+          ${data.spotify ? `<p>Spotify: <a href="${data.spotify}" target="_blank">Link</a></p>` : ""}
+          <div class="btns">
+            <button class="delete">Delete</button>
+          </div>
+        `;
+        card.querySelector(".delete").addEventListener("click", async () => {
+          await deleteDoc(doc(db, "artist", docSnap.id));
+          card.remove();
+          showToast(`${data.artistName} deleted ❌`, "#e74c3c");
+        });
+        approvedList.appendChild(card);
+      });
+      if (approvedList.innerHTML === "") approvedList.innerHTML = "<p>No approved artists yet 👀</p>";
+    }
+
+    loadArtists();
+  </script>
+</body>
+</html>

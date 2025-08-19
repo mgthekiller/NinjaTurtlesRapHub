@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ninja Turtles - Sign Up</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    .signup-box {
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+      width: 400px;
+      backdrop-filter: blur(8px);
+      border: 1px solid #22c55e;
+      animation: fadeUp 1.2s ease;
+    }
+    h2 {
+      text-align: center;
+      color: #22c55e;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      transition: 0.3s;
+    }
+    input:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #16a34a;
+      transform: scale(1.05);
+    }
+    #msg {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .progress {
+      margin-top: 10px;
+      height: 8px;
+      width: 100%;
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: #22c55e;
+      transition: width 0.3s;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-box">
+    <h2>🐢 Artist Sign Up 🎤</h2>
+    <form id="signupForm">
+      <input type="text" id="artistName" placeholder="Artist Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="url" id="youtube" placeholder="YouTube Channel (Required)" required>
+      <input type="url" id="instagram" placeholder="Instagram (Required)" required>
+      <input type="url" id="spotify" placeholder="Spotify (Optional)">
+      <label>Upload Artist Image:</label>
+      <input type="file" id="artistImage" accept="image/*" required>
+      <div class="progress">
+        <div class="progress-bar"></div>
+      </div>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p id="msg"></p>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyChYh6bHiB7dAAcDYbrHzW61gyQR0A5UuM",
+      authDomain: "ninjaturtels.firebaseapp.com",
+      projectId: "ninjaturtels",
+      storageBucket: "ninjaturtels.firebasestorage.app",
+      messagingSenderId: "1063186224531",
+      appId: "1:1063186224531:web:76b1369b477808e4654466",
+      measurementId: "G-HEB32CJR1N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("signupForm");
+    const msg = document.getElementById("msg");
+    const progress = document.querySelector(".progress");
+    const progressBar = document.querySelector(".progress-bar");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.style.color = "white";
+      msg.innerText = "Uploading...";
+      progress.style.display = "block";
+
+      const artistName = document.getElementById("artistName").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const youtube = document.getElementById("youtube").value;
+      const instagram = document.getElementById("instagram").value;
+      const spotify = document.getElementById("spotify").value;
+      const artistImage = document.getElementById("artistImage").files[0];
+
+      try {
+        // 1) رفع الصورة لـ Cloudinary مع Progress
+        const formData = new FormData();
+        formData.append("file", artistImage);
+        formData.append("upload_preset", "ninjarap"); // تأكد إن الـ preset ده موجود
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://api.cloudinary.com/v1_1/dhna8fguk/image/upload");
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = (event.loaded / event.total) * 100;
+            progressBar.style.width = percent + "%";
+          }
+        };
+
+        const cloudData = await new Promise((resolve, reject) => {
+          xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+          xhr.onerror = () => reject(new Error("Cloudinary upload failed"));
+          xhr.send(formData);
+        });
+
+        const imageUrl = cloudData.secure_url;
+        if (!imageUrl) throw new Error("Image upload failed, check Cloudinary settings");
+
+        // 2) إنشاء يوزر في Firebase
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 3) تخزين البيانات في Firestore
+        await setDoc(doc(db, "artist", user.uid), {
+          artistName,
+          email,
+          youtube,
+          instagram,
+          spotify,
+          imageUrl,
+          role: "user",
+          approved: false
+        });
+
+        msg.style.color = "lightgreen";
+        msg.innerText = "✅ Signup successful! Waiting for admin approval.";
+        form.reset();
+        progressBar.style.width = "0";
+        progress.style.display = "none";
+
+      } catch (error) {
+        console.error(error);
+        msg.style.color = "red";
+        msg.innerText = "❌ " + error.message;
+        progressBar.style.width = "0";
+        progress.style.display = "none";
+      }
+       setTimeout(() => {
+          window.location.href = "index.html";
+        }, 3000);
+    });
+  </script>
+</body>
+</html>

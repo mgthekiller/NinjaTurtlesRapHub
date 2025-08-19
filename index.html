@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AMG - Ninja Rap</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial Black', sans-serif;
+      background: linear-gradient(180deg, #0f172a, #1e293b);
+      color: #fff;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      background-image: url("https://wallpapers.com/images/hd/teenage-mutant-ninja-turtles-underground-lair-3umc2s7zldj8eh9v.jpg");
+      background-size: cover;
+      background-position: center;
+      text-align: center;
+      padding: 80px 20px;
+      font-size: 54px;
+      font-weight: bold;
+      text-shadow: 3px 3px 12px #000;
+      border-bottom: 4px solid #22c55e;
+      color: #22c55e;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 20px;
+      background: #111827;
+      border-bottom: 2px solid #22c55e;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    nav a {
+      color: #22c55e;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #16a34a;
+      text-shadow: 0 0 8px #22c55e;
+      transform: scale(1.1);
+    }
+
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+      background: rgba(0,0,0,0.6);
+      animation: fadeUp 2s ease-in-out;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      color: #22c55e;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 10px #000;
+    }
+
+    .hero p {
+      font-size: 20px;
+      max-width: 700px;
+      margin: auto;
+      line-height: 1.6;
+    }
+
+    section.cards {
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    section.cards h1 {
+      font-size: 40px;
+      color: #22c55e;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 8px #000;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .card {
+      background: rgba(34, 197, 94, 0.12);
+      border: 2px solid #22c55e;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      animation: fadeUp 1s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.03);
+      background: rgba(34, 197, 94, 0.25);
+    }
+
+    /* AMG Members cards special style */
+    #amgMembers .card {
+      border: 2px solid gold;
+      background: rgba(255, 215, 0, 0.15);
+    }
+
+    .card img {
+      max-width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card h3 {
+      color: #22c55e;
+      margin-bottom: 10px;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .social-links a {
+      font-size: 22px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .social-links a:hover {
+      transform: scale(1.2);
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #111827;
+      border-top: 2px solid #22c55e;
+      font-size: 14px;
+    }
+
+    /* فقاعات متحركة */
+    .bubble {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: url("https://cdn-icons-png.flaticon.com/512/2028/2028380.png") no-repeat center/contain;
+      animation: float 15s linear infinite;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(0.6); opacity: 0; }
+      50% { opacity: 0.6; }
+      100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    AMG Ninja Rap 🐢
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#artistCards">Artists</a>
+    <a href="#amgMembers">AMG Members</a>
+    <a href="signup.html">Sign Up</a>
+  </nav>
+
+  <div class="hero">
+    <h1>Welcome to the Ninja Underground</h1>
+    <p>هنا بيتجمع أقوى الرابرز 💥، زي ما السلاحف اتجمعت في المجاري 🐢. شارك فنك، استعرض شغلك، وخلي صوتك يطلع فوق!</p>
+  </div>
+
+  <!-- AMG Members -->
+  <section class="cards">
+    <h1>AMG Members</h1>
+    <div class="cards-grid" id="amgMembers">
+      <p>Loading AMG members...</p>
+    </div>
+  </section>
+
+  <!-- Artists -->
+  <section class="cards">
+    <h1>Artists</h1>
+    <div class="cards-grid" id="artistCards">
+      <p>Loading artists...</p>
+    </div>
+  </section>
+  
+  <footer>
+    © 2025 AMG Ninja Rap - All rights reserved 🐢
+  </footer>
+
+  <!-- فقاعات -->
+  <div class="bubble" style="left:10%; animation-delay:0s;"></div>
+  <div class="bubble" style="left:25%; animation-delay:3s;"></div>
+  <div class="bubble" style="left:45%; animation-delay:6s;"></div>
+  <div class="bubble" style="left:70%; animation-delay:9s;"></div>
+  <div class="bubble" style="left:85%; animation-delay:12s;"></div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyChYh6bHiB7dAAcDYbrHzW61gyQR0A5UuM",
+      authDomain: "ninjaturtels.firebaseapp.com",
+      projectId: "ninjaturtels",
+      storageBucket: "ninjaturtels.firebasestorage.app",
+      messagingSenderId: "1063186224531",
+      appId: "1:1063186224531:web:76b1369b477808e4654466",
+      measurementId: "G-HEB32CJR1N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const amgMembers = document.getElementById("amgMembers");
+    const artistCards = document.getElementById("artistCards");
+
+    // تحميل AMG Members
+    async function loadAMGMembers() {
+      amgMembers.innerHTML = "<p>Loading...</p>";
+      const q = query(collection(db, "amgMembers"));
+      const querySnapshot = await getDocs(q);
+      amgMembers.innerHTML = "";
+
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <h3>${data.name}</h3>
+        `;
+
+        amgMembers.appendChild(card);
+      });
+
+      if (amgMembers.innerHTML === "") {
+        amgMembers.innerHTML = "<p>No AMG members yet 🐢</p>";
+      }
+    }
+
+    // تحميل Artists
+    async function loadApprovedArtists() {
+      artistCards.innerHTML = "<p>Loading...</p>";
+      const q = query(collection(db, "artist"), where("approved", "==", true));
+      const querySnapshot = await getDocs(q);
+      artistCards.innerHTML = "";
+
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const card = document.createElement("div");
+        card.classList.add("card");
+
+        card.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.artistName}">
+          <h3>${data.artistName}</h3>
+          <div class="social-links">
+            ${data.youtube ? `<a href="${data.youtube}" target="_blank">🎥</a>` : ""}
+            ${data.instagram ? `<a href="${data.instagram}" target="_blank">📸</a>` : ""}
+            ${data.spotify ? `<a href="${data.spotify}" target="_blank">🎵</a>` : ""}
+          </div>
+        `;
+
+        artistCards.appendChild(card);
+      });
+
+      if (artistCards.innerHTML === "") {
+        artistCards.innerHTML = "<p>No approved artists yet 🐢</p>";
+      }
+    }
+
+    loadAMGMembers();
+    loadApprovedArtists();
+  </script>
+</body>
+</html>
